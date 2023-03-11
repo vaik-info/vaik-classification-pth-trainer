@@ -64,7 +64,7 @@ if __name__ == '__main__':
     parser.add_argument('--valid_input_dir_path', type=str, default='~/.vaik-mnist-classification-dataset/valid')
     parser.add_argument('--classes_txt_path', type=str, default='~/.vaik-mnist-classification-dataset/classes.txt')
     parser.add_argument('--epochs', type=int, default=10)
-    parser.add_argument('--step_size', type=int, default=1000)
+    parser.add_argument('--step_size', type=int, default=8000)
     parser.add_argument('--batch_size', type=int, default=8)
     parser.add_argument('--test_max_sample', type=int, default=100)
     parser.add_argument('--image_height', type=int, default=224)
