@@ -25,7 +25,6 @@ class MNISTImageDataset(Dataset):
         class_index = random.choice(list(range(len(self.classes))))
         class_label = self.classes[class_index]
         image_path = random.choice(self.image_dict[class_label])
-        print(image_path)
         image = read_image(image_path)
         if self.transform:
             image = self.transform(image)
