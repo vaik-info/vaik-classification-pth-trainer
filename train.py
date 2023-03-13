@@ -29,8 +29,8 @@ def train(train_input_dir_path, valid_input_dir_path, classes_txt_path, epochs, 
     # train dataset
     train_dataset = classification_dataset.MNISTImageDataset(train_input_dir_path, classes, batch_size * step_size,
                                                              image_size,
-                                                             T.Compose([T.RandomRotation(degrees=[-2.5, 2.5]),
-                                                                        T.RandomErasing(p=0.05)]))
+                                                             T.Compose([T.RandomRotation(degrees=[-0.5, 0.5]),
+                                                                        T.RandomErasing(p=0.025)]))
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True,
                                   num_workers=multiprocessing.cpu_count() // 4)
 
@@ -70,6 +70,8 @@ def train(train_input_dir_path, valid_input_dir_path, classes_txt_path, epochs, 
     for epoch in tqdm.tqdm(range(epochs), desc='epoch'):
         model.train()
         train_acc.reset(), val_acc.reset()
+        train_epoch_loss = 0
+        val_epoch_loss = 0
 
         for x, y in tqdm.tqdm(train_dataloader, desc='train'):
             optimizer.zero_grad()
@@ -81,18 +83,26 @@ def train(train_input_dir_path, valid_input_dir_path, classes_txt_path, epochs, 
             optimizer.step()
 
             train_acc(torch.argmax(y_pred, -1).cpu(), y.cpu())
+            train_epoch_loss += y_pred.shape[0] * loss.item()
 
         model.eval()
         for x, y in tqdm.tqdm(test_dataloader, desc='test'):
             with torch.no_grad():
                 x, y = x.to(device), y.to(device)
                 y_pred = model(x)
-            val_acc(torch.argmax(y_pred, -1).cpu(), y.cpu())
+                loss = criterion(y_pred, y)
+                val_acc(torch.argmax(y_pred, -1).cpu(), y.cpu())
+                val_epoch_loss += y_pred.shape[0] * loss.item()
 
-        print(f"Epoch{epoch+1}, TrainAcc:{train_acc.compute()}, ValAcc:{val_acc.compute()}")
-        torch.save(model.state_dict(), os.path.join(save_model_dir_path, f'epoch-{epoch}_step-{step_size}_batch-{batch_size}_val_acc-{train_acc.compute():.4f}'))
-        summary_writer.add_scalar("Train Accuracy", train_acc.compute(), epoch+1)
-        summary_writer.add_scalar("Validation Accuracy", val_acc.compute(), epoch+1)
+        train_epoch_loss = train_epoch_loss/(len(train_dataloader)*batch_size)
+        val_epoch_loss = val_epoch_loss/(len(test_dataloader)*batch_size)
+        print(f"Epoch{epoch+1}, Loss/train:{train_epoch_loss}, Loss/test:{val_epoch_loss},"
+              f" Accuracy/train:{train_acc.compute()}, Accuracy/test:{val_acc.compute()}")
+        torch.save(model.state_dict(), os.path.join(save_model_dir_path, f'epoch-{epoch}_step-{step_size}_batch-{batch_size}_train_loss-{train_epoch_loss:.4f}_val_loss-{val_epoch_loss:.4f}_train_acc-{train_acc.compute():.4f}_val_acc-{val_acc.compute():.4f}'))
+        summary_writer.add_scalar("Loss/train", train_epoch_loss, epoch+1)
+        summary_writer.add_scalar("Loss/test", val_epoch_loss, epoch+1)
+        summary_writer.add_scalar("Accuracy/train", train_acc.compute(), epoch+1)
+        summary_writer.add_scalar("Accuracy/test", val_acc.compute(), epoch+1)
         scheduler.step(epoch+1)
 
 
@@ -101,8 +111,8 @@ if __name__ == '__main__':
     parser.add_argument('--train_input_dir_path', type=str, default='~/.vaik-mnist-classification-dataset/train')
     parser.add_argument('--valid_input_dir_path', type=str, default='~/.vaik-mnist-classification-dataset/valid')
     parser.add_argument('--classes_txt_path', type=str, default='~/.vaik-mnist-classification-dataset/classes.txt')
-    parser.add_argument('--epochs', type=int, default=10)
-    parser.add_argument('--step_size', type=int, default=1000)
+    parser.add_argument('--epochs', type=int, default=20)
+    parser.add_argument('--step_size', type=int, default=2000)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--test_max_sample', type=int, default=200)
     parser.add_argument('--image_height', type=int, default=224)
