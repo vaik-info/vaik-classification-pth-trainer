@@ -1,6 +1,5 @@
 import torch.nn as nn
 import torchvision.transforms as T
-import torch.nn.functional as F
 import timm
 from timm.data import resolve_data_config
 from timm.data.transforms_factory import create_transform
