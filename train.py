@@ -44,7 +44,7 @@ def train(train_input_dir_path, valid_input_dir_path, classes_txt_path, epochs, 
                                   num_workers=multiprocessing.cpu_count() // 4)
 
     # test dataset
-    test_dataset = classification_dataset.MNISTImageDataset(valid_input_dir_path, classes, test_max_sample, preprocess_transform)
+    test_dataset = classification_dataset.MNISTImageDataset(valid_input_dir_path, classes, test_max_sample, T.Compose(preprocess_transform))
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True,
                                  num_workers=multiprocessing.cpu_count() // 4)
 
