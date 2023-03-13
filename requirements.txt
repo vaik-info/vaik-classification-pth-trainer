@@ -5,3 +5,4 @@ tqdm>=4.65.0
 torchmetrics>=0.11.4
 pytz>=2022.7.1
 tensorboard>=2.12.0
+onnx>=1.13.1

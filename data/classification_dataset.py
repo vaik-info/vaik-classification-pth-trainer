@@ -2,19 +2,18 @@ import glob
 import os
 import re
 import random
+
+import torchvision
 from tqdm import tqdm
 
 from torch.utils.data import Dataset
 from torchvision.io import read_image
 
-from data import ops
-
 
 class MNISTImageDataset(Dataset):
-    def __init__(self, input_dir_path, classes, steps=1000, image_shape=(256, 256), transform=None):
+    def __init__(self, input_dir_path, classes, steps=1000, transform=None):
         self.classes = classes
         self.steps = steps
-        self.image_shape = image_shape
         self.transform = transform
         self.image_dict = self.prepare_image_dict(input_dir_path, classes)
 
@@ -25,10 +24,9 @@ class MNISTImageDataset(Dataset):
         class_index = random.choice(list(range(len(self.classes))))
         class_label = self.classes[class_index]
         image_path = random.choice(self.image_dict[class_label])
-        image = read_image(image_path)
+        image = torchvision.transforms.functional.to_pil_image(read_image(image_path))
         if self.transform:
             image = self.transform(image)
-        image, _, _ = ops.resize_and_padding(image, self.image_shape)
         return image, class_index
 
     @staticmethod
