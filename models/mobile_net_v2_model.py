@@ -12,8 +12,7 @@ class MobileNetV2Model(nn.Module):
         self.mobile_net_v2 = timm.create_model('mobilenetv2_100', pretrained=True)
         self.mobile_net_v2.classifier = nn.Sequential(
             nn.Dropout(p=0.2, inplace=False),
-            nn.Linear(in_features=1280, out_features=class_num, bias=True),
-            nn.Softmax(dim=1)
+            nn.Linear(in_features=1280, out_features=class_num, bias=True)
         )
         config = resolve_data_config({}, model=self.mobile_net_v2)
         transform = create_transform(**config)
