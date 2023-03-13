@@ -18,7 +18,7 @@ def export(input_pth_model_path, input_image_shape, classes_num, opset_version, 
     dummy_input = torch.randn(1, input_image_shape[0], input_image_shape[1], input_image_shape[2], requires_grad=True)
 
     torch.onnx.export(torch_model, dummy_input, output_onnx_model_path, export_params=True,
-                      opset_version=opset_version, do_constant_folding=True, input_names=['modelInput'],
+                      opset_version=opset_version, do_constant_folding=True, input_names=['input'],
                       output_names=['output'], dynamic_axes={'input': {0: 'batch_size'}, 'output': {0: 'batch_size'}})
 
     mean, std = torch_model.get_normalize_info()
