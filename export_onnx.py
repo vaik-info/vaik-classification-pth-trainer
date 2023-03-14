@@ -22,7 +22,7 @@ def export(input_pth_model_path, input_image_shape, classes_num, opset_version, 
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='train pth')
+    parser = argparse.ArgumentParser(description='export onnx')
     parser.add_argument('--input_pth_model_path', type=str,
                         default='~/.vaik-classification-pth-trainer/output_model/2023-03-13-11-02-02/epoch-8_step-1000_batch-8_train_loss-0.6040_val_loss-0.3731_train_acc-0.8706_val_acc-0.9750')
     parser.add_argument('--input_image_height', type=int, default=224)
