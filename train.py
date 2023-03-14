@@ -116,7 +116,7 @@ if __name__ == '__main__':
     parser.add_argument('--step_size', type=int, default=2000)
     parser.add_argument('--batch_size', type=int, default=8)
     parser.add_argument('--test_max_sample', type=int, default=200)
-    parser.add_argument('--image_size', type=int, default=256)
+    parser.add_argument('--image_size', type=int, default=224)
     parser.add_argument('--output_dir_path', type=str, default='~/.vaik-classification-pth-trainer/output_model')
     args = parser.parse_args()
 

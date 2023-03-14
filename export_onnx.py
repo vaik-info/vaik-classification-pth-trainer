@@ -9,7 +9,7 @@ import onnx
 
 def export(input_pth_model_path, input_image_shape, classes_num, opset_version, output_onnx_model_path):
     os.makedirs(os.path.dirname(output_onnx_model_path), exist_ok=True)
-    torch_model = mobile_net_v2_model.MobileNetV2Model(classes_num)
+    torch_model = mobile_net_v2_model.MobileNetV2Model(classes_num, preprocessing=lambda x: torch.permute(x, (0, 3, 1, 2)))
     torch_model.mobile_net_v2.classifier.add_module('softmax', nn.Softmax(dim=1))
 
     torch_model.load_state_dict(torch.load(input_pth_model_path))
@@ -20,16 +20,6 @@ def export(input_pth_model_path, input_image_shape, classes_num, opset_version, 
     torch.onnx.export(torch_model, dummy_input, output_onnx_model_path, export_params=True,
                       opset_version=opset_version, do_constant_folding=True, input_names=['input'],
                       output_names=['output'], dynamic_axes={'input': {0: 'batch_size'}, 'output': {0: 'batch_size'}})
-
-    mean, std = torch_model.get_normalize_info()
-    onnx_model = onnx.load(output_onnx_model_path)
-    meta_mean = onnx_model.metadata_props.add()
-    meta_mean.key = "normalize_mean"
-    meta_mean.value = str(mean)
-    meta_std = onnx_model.metadata_props.add()
-    meta_std.key = "normalize_std"
-    meta_std.value = str(std)
-    onnx.save(onnx_model, output_onnx_model_path)
 
 
 if __name__ == '__main__':
@@ -48,5 +38,5 @@ if __name__ == '__main__':
     args.input_pth_model_path = os.path.expanduser(args.input_pth_model_path)
     args.output_onnx_model_path = os.path.expanduser(args.output_onnx_model_path)
 
-    export(args.input_pth_model_path, (args.input_image_ch, args.input_image_height, args.input_image_width),
+    export(args.input_pth_model_path, (args.input_image_height, args.input_image_width, args.input_image_ch),
            args.classes_num, args.opset_version, args.output_onnx_model_path)
