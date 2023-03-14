@@ -4,12 +4,11 @@ import os
 import torch
 import torch.nn as nn
 from models import mobile_net_v2_model
-import onnx
 
 
 def export(input_pth_model_path, input_image_shape, classes_num, opset_version, output_onnx_model_path):
     os.makedirs(os.path.dirname(output_onnx_model_path), exist_ok=True)
-    torch_model = mobile_net_v2_model.MobileNetV2Model(classes_num, preprocessing=lambda x: torch.permute(x, (0, 3, 1, 2)))
+    torch_model = mobile_net_v2_model.MobileNetV2Model(classes_num, preprocessing=lambda x: torch.permute(torch.div(x, 255.), (0, 3, 1, 2)))
     torch_model.mobile_net_v2.classifier.add_module('softmax', nn.Softmax(dim=1))
 
     torch_model.load_state_dict(torch.load(input_pth_model_path))
